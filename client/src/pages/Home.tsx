@@ -1,5 +1,5 @@
 /* MOMO BAN CHECKER — private access UI with a local-only status demo. */
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/lib/supabase";
 
 const SITE_ACCESS_CODE = "MOMO47";
 
@@ -95,6 +96,7 @@ export default function Home() {
   const [memberName, setMemberName] = useState("");
   const [members, setMembers] = useState(["Amani K.", "Mussa T.", "Neema J.", "Kassim R."]);
   const [memberMessage, setMemberMessage] = useState("");
+  const [membersLoading, setMembersLoading] = useState(Boolean(supabase));
 
   const filteredCountries = useMemo(() => {
     const query = countrySearch.trim().toLowerCase();
@@ -110,6 +112,28 @@ export default function Home() {
   const formattedNumber = countryNumber(selectedCountry, phone);
   const defaultSupportMessage = `Hello MOMO Support, please help me review ${formattedNumber}. My demo result is ${outcome ? outcomes[outcome].label : "not checked yet"}.`;
   const step = !selectedCountry ? 1 : outcome ? 3 : 2;
+
+  useEffect(() => {
+    const client = supabase;
+    if (!client) return;
+    const liveClient = client;
+    let cancelled = false;
+    async function loadMembers() {
+      const { data, error } = await liveClient
+        .from("momo_ban_members")
+        .select("display_name")
+        .order("joined_at", { ascending: false })
+        .limit(8);
+      if (!cancelled) {
+        if (!error && data?.length) setMembers(data.map(row => row.display_name));
+        setMembersLoading(false);
+      }
+    }
+    void loadMembers();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function enterSite(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -171,11 +195,28 @@ export default function Home() {
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
   }
 
-  function joinMembers(event: FormEvent<HTMLFormElement>) {
+  async function joinMembers(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const cleanName = memberName.trim().replace(/\s+/g, " ");
     if (cleanName.length < 2) {
       setMemberMessage("Enter a display name with at least 2 characters.");
+      return;
+    }
+    const client = supabase;
+    if (client) {
+      setMemberMessage("Joining the live member list…");
+      const { data, error } = await client
+        .from("momo_ban_members")
+        .insert({ display_name: cleanName.slice(0, 32) })
+        .select("display_name")
+        .single();
+      if (error) {
+        setMemberMessage(error.code === "23505" ? "That display name is already in use." : "Could not join right now. Please try again.");
+        return;
+      }
+      setMembers(current => [data.display_name, ...current.filter(member => member.toLowerCase() !== data.display_name.toLowerCase())].slice(0, 8));
+      setMemberName("");
+      setMemberMessage("You joined the live Supabase member list.");
       return;
     }
     setMembers(current => [cleanName.slice(0, 22), ...current.filter(member => member.toLowerCase() !== cleanName.toLowerCase())].slice(0, 8));
@@ -268,8 +309,8 @@ export default function Home() {
         </section>
         <section className="ref-info-strip"><span><span className="ref-pulse amber" /> PRIVATE CHECKER NODE</span><small>Country routing enabled · official review still required</small></section>
         <section id="members" className="ref-members-section">
-          <div className="ref-members-heading"><div className="ref-terminal-line"><Users size={14} /> COMMUNITY NODE / MEMBERS</div><h2>People using<br /><span>MOMO CHECKER.</span></h2><p>A simple community board for this browser demo. Display names only—no phone numbers, passwords, or private account data are shown.</p><div className="ref-member-count"><strong>{members.length.toString().padStart(2, "0")}</strong><span>VISIBLE DEMO MEMBERS<br /><small>LOCAL LIST / SAFE MODE</small></span></div></div>
-          <div className="ref-members-card"><div className="ref-card-head"><span><span className="ref-pulse" /> JOINED MEMBERS</span><small>PUBLIC DISPLAY NAMES</small></div><div className="ref-member-list">{members.map((member, index) => <div className="ref-member-row" key={`${member}-${index}`}><span className="ref-member-avatar">{member.slice(0, 1).toUpperCase()}</span><span><b>{member}</b><small>member node #{String(index + 1).padStart(2, "0")}</small></span><i>ACTIVE</i></div>)}</div><form className="ref-join-form" onSubmit={joinMembers}><label htmlFor="member-name">ADD YOUR DISPLAY NAME</label><div className="ref-join-row"><Input id="member-name" value={memberName} onChange={event => { setMemberName(event.target.value); setMemberMessage(""); }} placeholder="e.g. Baraka M." maxLength={22} /><Button type="submit"><Users size={15} /> JOIN</Button></div>{memberMessage && <small className="ref-member-message">{memberMessage}</small>}</form></div>
+          <div className="ref-members-heading"><div className="ref-terminal-line"><Users size={14} /> COMMUNITY NODE / MEMBERS</div><h2>People using<br /><span>MOMO CHECKER.</span></h2><p>{supabase ? "Display names are stored in Supabase with row-level security. No phone numbers, passwords, or private account data are shown." : "A simple community board for this browser demo. Add the VITE_SUPABASE variables to enable live member persistence."}</p><div className="ref-member-count"><strong>{membersLoading ? "—" : members.length.toString().padStart(2, "0")}</strong><span>{supabase ? "LIVE SUPABASE MEMBERS" : "VISIBLE DEMO MEMBERS"}<br /><small>{supabase ? "RLS ENABLED / DISPLAY NAMES ONLY" : "LOCAL LIST / SAFE MODE"}</small></span></div></div>
+          <div className="ref-members-card"><div className="ref-card-head"><span><span className="ref-pulse" /> JOINED MEMBERS</span><small>{supabase ? "SUPABASE / RLS" : "LOCAL DEMO"}</small></div><div className="ref-member-list">{members.map((member, index) => <div className="ref-member-row" key={`${member}-${index}`}><span className="ref-member-avatar">{member.slice(0, 1).toUpperCase()}</span><span><b>{member}</b><small>member node #{String(index + 1).padStart(2, "0")}</small></span><i>ACTIVE</i></div>)}</div><form className="ref-join-form" onSubmit={joinMembers}><label htmlFor="member-name">ADD YOUR DISPLAY NAME</label><div className="ref-join-row"><Input id="member-name" value={memberName} onChange={event => { setMemberName(event.target.value); setMemberMessage(""); }} placeholder="e.g. Baraka M." maxLength={32} /><Button type="submit" disabled={membersLoading}><Users size={15} /> {membersLoading ? "SYNC" : "JOIN"}</Button></div>{memberMessage && <small className="ref-member-message">{memberMessage}</small>}</form></div>
         </section>
         <section id="support" className="ref-support-section">
           <div><div className="ref-terminal-line"><MessageCircle size={14} /> SUPPORT ROUTE / WHATSAPP</div><h2>Need help with<br /><span>the next step?</span></h2><p>Write a message and open WhatsApp with the text pre-filled. No support number is configured yet, so WhatsApp will let you choose the recipient.</p><div className="ref-support-points"><div><CheckCircle2 size={15} /><span>Use official support only</span></div><div><CheckCircle2 size={15} /><span>Never share OTPs or passwords</span></div></div></div>
