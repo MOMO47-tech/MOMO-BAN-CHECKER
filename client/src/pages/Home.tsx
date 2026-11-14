@@ -565,58 +565,8 @@ export default function Home() {
               )}
             </div>
           </div>
-          <aside className="ref-monitor" aria-label="Status monitor">
-            <div className="ref-monitor-bar">
-              <span>
-                <i />
-                <i />
-                <i />
-              </span>
-              <small>momo://signal-monitor</small>
-              <span>— □ ×</span>
-            </div>
-            <div className="ref-monitor-content">
-              <div className="ref-monitor-code">
-                [01] boot sequence ... <b>OK</b>
-                <br />
-                [02] country router ... <b>READY</b>
-                <br />
-                [03] remote link ... <em>DISABLED</em>
-                <br />
-                [04] local signal ... <b>ACTIVE</b>
-              </div>
-              <div className="ref-monitor-core">
-                <div>
-                  <UserRound size={22} />
-                </div>
-                <span>
-                  {outcome ? outcomes[outcome].label : "WAITING FOR INPUT"}
-                </span>
-              </div>
-              <div className="ref-monitor-footer">
-                <span>SIGNAL QUALITY</span>
-                <b>{outcome ? "● ● ●" : "— — —"}</b>
-                <small>{formattedNumber}</small>
-              </div>
-            </div>
-          </aside>
         </section>
       </main>
-      <footer className="ref-app-footer">
-        <div className="ref-brand-cluster">
-          <div className="ref-brand-mark">
-            <img src="/manus-storage/logo-skull_cd8984a8.png" alt="" />
-          </div>
-          <div>
-            <b>MOMO BAN CHECKER</b>
-            <small>SAFE MODE / LOCAL DEMO</small>
-          </div>
-        </div>
-        <div>Built for clear, official recovery guidance.</div>
-        <div className="ref-footer-meta">
-          <CircleHelp size={13} /> HELP &amp; SAFETY <span>© 2026</span>
-        </div>
-      </footer>
     </div>
   );
 }

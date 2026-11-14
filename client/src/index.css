@@ -323,3 +323,7 @@
 .ref-auth-aside { border-left-color: rgba(255,43,154,.42); }
 .ref-auth-aside b { color: #ff62b5; text-shadow: 0 0 12px rgba(255,43,154,.45); }
 @media (max-width: 720px) { .dark-web-welcome > span { font-size: 1.7rem; } .dark-web-welcome > strong { font-size: 1.85rem; } .ref-auth-card::before { font-size: 6px; } }
+
+/* Checker-only layout: no signal monitor or content below the result. */
+.ref-dashboard-hero { display: block; min-height: auto; }
+.ref-dashboard-copy { min-height: calc(100vh - 66px); }
