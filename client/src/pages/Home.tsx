@@ -1,5 +1,5 @@
 /* MOMO BAN CHECKER — private access UI with an honest, format-only preview. */
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -51,8 +51,8 @@ const outcomes: Record<
   { label: string; title: string; body: string; action: string; tone: string }
 > = {
   online: {
-    label: "ONLINE",
-    title: "Number is online.",
+    label: "UNVERIFIED",
+    title: "Official status unavailable.",
     body: "The number passed the local preview check.",
     action: "Use the official app to confirm account status.",
     tone: "green",
@@ -114,6 +114,7 @@ export default function Home() {
   ]);
   const [memberMessage, setMemberMessage] = useState("");
   const [membersLoading, setMembersLoading] = useState(Boolean(supabase));
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   const filteredCountries = useMemo(() => {
     const query = countrySearch.trim().toLowerCase();
@@ -168,6 +169,28 @@ export default function Home() {
     setAccessGranted(true);
   }
 
+  function playScanSound() {
+    if (typeof window === "undefined") return;
+    const AudioContextConstructor = window.AudioContext;
+    if (!AudioContextConstructor) return;
+    const context = audioContextRef.current ?? new AudioContextConstructor();
+    audioContextRef.current = context;
+    if (context.state === "suspended") void context.resume();
+    const now = context.currentTime;
+    [0, 0.13, 0.26].forEach((offset, index) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = index === 2 ? "sine" : "square";
+      oscillator.frequency.value = index === 2 ? 780 : 420 + index * 90;
+      gain.gain.setValueAtTime(0.0001, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.045, now + offset + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.09);
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start(now + offset);
+      oscillator.stop(now + offset + 0.1);
+    });
+  }
+
   function runCheck() {
     const number = digitsOnly(phone);
     if (!selectedCountry) {
@@ -179,6 +202,7 @@ export default function Home() {
       return;
     }
     setCheckError("");
+    playScanSound();
     const lastDigit = Number(number[number.length - 1]);
     if ([0, 3, 6, 9].includes(lastDigit)) setOutcome("permanent");
     else if ([1, 4, 7].includes(lastDigit)) setOutcome("temporary");
@@ -535,10 +559,6 @@ export default function Home() {
                 </div>
               )}
             </div>
-            <div className="ref-safe-line">
-              <ShieldCheck size={14} /> SAFE MODE <span /> no OTP, chats, or
-              WhatsApp credentials collected
-            </div>
           </div>
           <aside className="ref-monitor" aria-label="Status monitor">
             <div className="ref-monitor-bar">
@@ -575,141 +595,6 @@ export default function Home() {
               </div>
             </div>
           </aside>
-        </section>
-        <section className="ref-info-strip">
-          <span>
-            <span className="ref-pulse amber" /> PRIVATE CHECKER NODE
-          </span>
-          <small>
-            Country routing enabled · official review still required
-          </small>
-        </section>
-        <section id="members" className="ref-members-section">
-          <div className="ref-members-heading">
-            <div className="ref-terminal-line">
-              <Users size={14} /> COMMUNITY NODE / MEMBERS
-            </div>
-            <h2>
-              People using
-              <br />
-              <span>MOMO CHECKER.</span>
-            </h2>
-            <p>
-              {supabase
-                ? "Display names are stored in Supabase with row-level security. No phone numbers, passwords, or private account data are shown."
-                : "A simple community board for this browser demo. Add the VITE_SUPABASE variables to enable live member persistence."}
-            </p>
-            <div className="ref-member-count">
-              <strong>
-                {membersLoading
-                  ? "—"
-                  : members.length.toString().padStart(2, "0")}
-              </strong>
-              <span>
-                {supabase ? "LIVE SUPABASE MEMBERS" : "VISIBLE DEMO MEMBERS"}
-                <br />
-                <small>
-                  {supabase
-                    ? "RLS ENABLED / DISPLAY NAMES ONLY"
-                    : "LOCAL LIST / SAFE MODE"}
-                </small>
-              </span>
-            </div>
-          </div>
-          <div className="ref-members-card">
-            <div className="ref-card-head">
-              <span>
-                <span className="ref-pulse" /> JOINED MEMBERS
-              </span>
-              <small>{supabase ? "SUPABASE / RLS" : "LOCAL DEMO"}</small>
-            </div>
-            <div className="ref-member-list">
-              {members.map((member, index) => (
-                <div className="ref-member-row" key={`${member}-${index}`}>
-                  <span className="ref-member-avatar">
-                    {member.slice(0, 1).toUpperCase()}
-                  </span>
-                  <span>
-                    <b>{member}</b>
-                    <small>
-                      member node #{String(index + 1).padStart(2, "0")}
-                    </small>
-                  </span>
-                  <i>ACTIVE</i>
-                </div>
-              ))}
-            </div>
-            <form className="ref-join-form" onSubmit={joinMembers}>
-              <label htmlFor="member-name">ADD YOUR DISPLAY NAME</label>
-              <div className="ref-join-row">
-                <Input
-                  id="member-name"
-                  value={memberName}
-                  onChange={event => {
-                    setMemberName(event.target.value);
-                    setMemberMessage("");
-                  }}
-                  placeholder="e.g. Baraka M."
-                  maxLength={32}
-                />
-                <Button type="submit" disabled={membersLoading}>
-                  <Users size={15} /> {membersLoading ? "SYNC" : "JOIN"}
-                </Button>
-              </div>
-              {memberMessage && (
-                <small className="ref-member-message">{memberMessage}</small>
-              )}
-            </form>
-          </div>
-        </section>
-        <section id="support" className="ref-support-section">
-          <div>
-            <div className="ref-terminal-line">
-              <MessageCircle size={14} /> SUPPORT ROUTE / WHATSAPP
-            </div>
-            <h2>
-              Need help with
-              <br />
-              <span>the next step?</span>
-            </h2>
-            <p>
-              Write a message and open WhatsApp with the text pre-filled. No
-              support number is configured yet, so WhatsApp will let you choose
-              the recipient.
-            </p>
-            <div className="ref-support-points">
-              <div>
-                <CheckCircle2 size={15} />
-                <span>Use official support only</span>
-              </div>
-              <div>
-                <CheckCircle2 size={15} />
-                <span>Never share OTPs or passwords</span>
-              </div>
-            </div>
-          </div>
-          <div className="ref-support-card">
-            <div className="ref-card-head">
-              <span>
-                <MessageCircle size={14} /> WHATSAPP SUPPORT
-              </span>
-              <small>COMPOSE MODE</small>
-            </div>
-            <label htmlFor="support-message">YOUR MESSAGE</label>
-            <textarea
-              id="support-message"
-              value={supportText || defaultSupportMessage}
-              onChange={event => setSupportText(event.target.value)}
-            />
-            <Button
-              type="button"
-              onClick={openWhatsAppSupport}
-              className="ref-whatsapp-button"
-            >
-              <MessageCircle size={16} /> OPEN WHATSAPP{" "}
-              <ArrowUpRight size={14} />
-            </Button>
-          </div>
         </section>
       </main>
       <footer className="ref-app-footer">
