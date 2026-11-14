@@ -312,8 +312,13 @@ export default function Home() {
             <div className="ref-auth-icon">
               <LockKeyhole size={24} />
             </div>
-            <h1 id="auth-title">
-              Welcome to <strong>MOMO BAN CHECKER</strong>
+            <h1
+              id="auth-title"
+              className="dark-web-welcome"
+              data-text="WELCOME MOMO BAN CHECKER"
+            >
+              <span>WELCOME</span>
+              <strong>MOMO BAN CHECKER</strong>
             </h1>
             <p className="ref-auth-copy">
               Enter your phone number and site access code to open the local
