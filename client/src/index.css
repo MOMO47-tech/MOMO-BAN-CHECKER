@@ -327,3 +327,27 @@
 /* Checker-only layout: no signal monitor or content below the result. */
 .ref-dashboard-hero { display: block; min-height: auto; }
 .ref-dashboard-copy { min-height: calc(100vh - 66px); }
+
+/* Green reference-inspired UI pass */
+:root { --momo-green: #22c55e; --momo-green-bright: #86efac; --momo-green-dim: #14532d; }
+.ref-app-shell, .ref-auth-screen { color: #d9ffe7; background: #020b06; }
+.ref-app-shell::before, .ref-auth-screen::before { background-image: linear-gradient(rgba(34,197,94,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(34,197,94,.07) 1px, transparent 1px); background-size: 32px 32px; }
+.ref-app-topbar, .ref-auth-topbar { border-color: rgba(34,197,94,.38); background: rgba(2,11,6,.94); }
+.ref-brand-cluster b, .ref-auth-brand span, .ref-dashboard-copy h1 span, .ref-auth-card h1 strong { color: var(--momo-green-bright); text-shadow: 0 0 16px rgba(34,197,94,.45); }
+.ref-brand-cluster small, .ref-auth-brand small, .ref-terminal-line, .ref-card-head, .ref-field-label { color: #55c978; }
+.ref-app-nav a, .ref-app-nav button { color: #9af7b5; }
+.ref-app-nav a:hover, .ref-app-nav button:hover { color: #eaffef; text-shadow: 0 0 10px rgba(34,197,94,.75); }
+.ref-dashboard-copy h1 { color: #f0fff4; letter-spacing: -.03em; }
+.ref-checker-card, .ref-auth-card { border-color: rgba(34,197,94,.48); background: rgba(2, 18, 9, .94); box-shadow: 0 0 34px rgba(34,197,94,.13), inset 0 0 35px rgba(34,197,94,.035); }
+.ref-checker-card::before, .ref-auth-card::before { color: rgba(134,239,172,.42); }
+.ref-pulse, .ref-step.current b, .ref-step.done b, .ref-result-badge { color: var(--momo-green-bright); border-color: var(--momo-green); }
+.ref-step.current, .ref-step.done { border-color: rgba(34,197,94,.58); background: rgba(34,197,94,.08); }
+.ref-country-trigger, .ref-auth-input, .ref-phone-input { border-color: rgba(34,197,94,.42); background: #03150a; color: #d9ffe7; }
+.ref-country-trigger:hover, .ref-auth-input:focus-within, .ref-phone-input:focus-within { border-color: var(--momo-green-bright); box-shadow: 0 0 16px rgba(34,197,94,.2); }
+.ref-check-button, .ref-enter-button { background: var(--momo-green); color: #021407; border-color: var(--momo-green-bright); box-shadow: 0 0 18px rgba(34,197,94,.4); }
+.ref-check-button:hover, .ref-enter-button:hover { background: var(--momo-green-bright); color: #021407; }
+.ref-auth-icon { border-color: var(--momo-green); color: var(--momo-green-bright); box-shadow: 0 0 16px rgba(34,197,94,.7); }
+.ref-result-card { border-color: rgba(134,239,172,.6); background: rgba(5, 34, 16, .9); }
+.ref-truth-banner { border-color: rgba(34,197,94,.35); color: #8ee6a7; background: rgba(34,197,94,.08); }
+.ref-auth-aside { border-left-color: rgba(34,197,94,.5); }
+.ref-auth-aside b { color: var(--momo-green-bright); text-shadow: 0 0 12px rgba(34,197,94,.55); }

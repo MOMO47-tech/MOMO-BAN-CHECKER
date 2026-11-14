@@ -412,7 +412,6 @@ export default function Home() {
         </div>
         <div className="ref-app-nav">
           <a href="#checker">CHECK NUMBER</a>
-          <a href="#support">WHATSAPP SUPPORT</a>
           <button type="button" onClick={logout}>
             EXIT <ArrowUpRight size={13} />
           </button>
