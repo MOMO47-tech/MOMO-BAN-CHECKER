@@ -290,3 +290,17 @@
 .ref-result-card h2 { letter-spacing: -.035em; }
 .ref-result-disclaimer { display: block; margin-top: 11px; color: #ffcb76; font-weight: 500; }
 @media (max-width: 720px) { .ref-truth-banner { font-size: 7px; } }
+
+/* Dark-web terminal finish: deeper black surfaces, phosphor accents, and compact controls. */
+.ref-auth-screen, .ref-app-shell { background: #020608; }
+.ref-auth-screen::after, .ref-app-shell::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 30; opacity: .08; background: repeating-linear-gradient(0deg, rgba(126,255,216,.16) 0, rgba(126,255,216,.16) 1px, transparent 1px, transparent 4px); mix-blend-mode: screen; }
+.ref-auth-topbar, .ref-app-topbar { background: rgba(2, 6, 8, .96); border-color: rgba(83, 255, 210, .24); }
+.ref-auth-card, .ref-checker-card, .ref-members-card, .ref-support-card { background: rgba(3, 12, 16, .94); border-color: rgba(83, 255, 210, .38); box-shadow: 0 0 28px rgba(0, 255, 190, .06), inset 0 0 24px rgba(0, 255, 190, .035); }
+.ref-auth-card h1 strong, .ref-dashboard-copy h1 span, .ref-members-heading h2 span, .ref-support-section h2 span { color: #58ffd2; text-shadow: 0 0 16px rgba(88,255,210,.3); }
+.ref-enter-button, .ref-check-button, .ref-whatsapp-button { text-shadow: 0 0 8px rgba(3,12,16,.4); }
+.ref-password-toggle { display: grid; place-items: center; flex: 0 0 auto; border: 0; padding: 3px; background: transparent; color: #62d7cd; cursor: pointer; }
+.ref-password-toggle:hover { color: #fff; }
+.ref-country-flag { display: inline-grid; place-items: center; width: 24px; font-size: 17px; line-height: 1; }
+.ref-country-trigger { background: #030c10; }
+.ref-country-list button:hover { background: rgba(88,255,210,.1); color: #eafff8; }
+.ref-result-badge { letter-spacing: .16em; text-shadow: 0 0 12px currentColor; }

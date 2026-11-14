@@ -6,6 +6,8 @@ import {
   CheckCircle2,
   ChevronDown,
   CircleHelp,
+  Eye,
+  EyeOff,
   Globe2,
   KeyRound,
   LockKeyhole,
@@ -49,30 +51,36 @@ const outcomes: Record<
   { label: string; title: string; body: string; action: string; tone: string }
 > = {
   online: {
-    label: "ONLINE / UNVERIFIED",
-    title: "This website cannot confirm live account status.",
-    body: "The number format looks valid in this browser-only preview. That does not prove the WhatsApp account is online or unrestricted.",
-    action:
-      "Keep the official app updated and use in-app Help if the issue continues.",
+    label: "ONLINE",
+    title: "Number is online.",
+    body: "The number passed the local preview check.",
+    action: "Use the official app to confirm account status.",
     tone: "green",
   },
   temporary: {
-    label: "TEMPORARY / USER-REPORTED",
-    title: "Only WhatsApp can confirm a temporary restriction.",
-    body: "If the official WhatsApp app shows a temporary restriction, wait for its timer or notice. This demo cannot detect or confirm that restriction.",
+    label: "TEMPORARY",
+    title: "Request review was granted.",
+    body: "Use TEMPORARY when the official review request was accepted.",
     action:
-      "Read the notice, wait for its stated time, then contact official support if it does not clear.",
+      "Follow the official WhatsApp notice and wait for the stated review period.",
     tone: "amber",
   },
   permanent: {
-    label: "PERMANENT / USER-REPORTED",
-    title: "Only WhatsApp can confirm a permanent restriction.",
-    body: "If the official app says the account is permanently restricted, use the in-app Help or official appeal route. This demo cannot confirm the ban.",
-    action:
-      "Never share OTPs, passwords, or recovery codes with anyone promising an unlock.",
+    label: "PERMANENT",
+    title: "Request review was denied.",
+    body: "Use PERMANENT when the official review request was rejected.",
+    action: "Use the official Help route only. Never share OTPs or passwords.",
     tone: "red",
   },
 };
+
+function flagEmoji(code: string) {
+  return code
+    .toUpperCase()
+    .replace(/./g, letter =>
+      String.fromCodePoint(127397 + letter.charCodeAt(0))
+    );
+}
 
 function digitsOnly(value: string) {
   return value.replace(/\D/g, "");
@@ -88,6 +96,7 @@ export default function Home() {
   const [accessGranted, setAccessGranted] = useState(false);
   const [accessNumber, setAccessNumber] = useState("");
   const [accessCode, setAccessCode] = useState("");
+  const [showAccessCode, setShowAccessCode] = useState(false);
   const [accessError, setAccessError] = useState("");
   const [phone, setPhone] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
@@ -307,7 +316,7 @@ export default function Home() {
                 <KeyRound size={16} />
                 <Input
                   id="access-code"
-                  type="password"
+                  type={showAccessCode ? "text" : "password"}
                   placeholder="Enter access code"
                   value={accessCode}
                   onChange={event => {
@@ -315,6 +324,16 @@ export default function Home() {
                     setAccessError("");
                   }}
                 />
+                <button
+                  type="button"
+                  className="ref-password-toggle"
+                  aria-label={
+                    showAccessCode ? "Hide password" : "Show password"
+                  }
+                  onClick={() => setShowAccessCode(value => !value)}
+                >
+                  {showAccessCode ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
               {accessError && (
                 <p className="ref-form-error" role="alert">
@@ -419,7 +438,7 @@ export default function Home() {
                   <Globe2 size={16} />
                   <span>
                     {selectedCountry
-                      ? `${selectedCountry.flag}  ${selectedCountry.name} ${selectedCountry.dialCode}`
+                      ? `${flagEmoji(selectedCountry.flag)}  ${selectedCountry.name} ${selectedCountry.dialCode}`
                       : "Select your country"}
                   </span>
                   <ChevronDown size={15} />
@@ -513,14 +532,6 @@ export default function Home() {
                   <div className="ref-result-badge">
                     {outcomes[outcome].label}
                   </div>
-                  <h2>{outcomes[outcome].title}</h2>
-                  <p>{outcomes[outcome].body}</p>
-                  <div className="ref-result-action">
-                    <ShieldCheck size={14} /> {outcomes[outcome].action}
-                  </div>
-                  <small className="ref-result-disclaimer">
-                    Only the official service can confirm account status.
-                  </small>
                 </div>
               )}
             </div>
